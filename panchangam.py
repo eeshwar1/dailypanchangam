@@ -10,7 +10,7 @@ class Panchangam(tk.Tk):
         
        tk.Tk.__init__(self, *args, **kwargs)
        
-       self.geometry("800x360")
+       self.geometry("760x360")
        self.date = date.today()
        
        self.container = dayFrame(self, self.date)
@@ -20,13 +20,18 @@ class Panchangam(tk.Tk):
        self.title("Daily Panchangam")
        self.resizable(False, False) # disable resizing
     
-       frmBtnPrev = tk.Frame(master=self)
-       frmBtnPrev.grid(row=8,column=1,padx=5, pady=5)
+       frmBtnPrev = tk.Frame(master=self, borderwidth=1)
+       frmBtnPrev.grid(row=8,column=1,padx=5, pady=5, sticky=tk.W)
        btnPrev = tk.Button(master=frmBtnPrev, text="<", command=self.showPrevDate)
        btnPrev.pack()
        
-       frmBtnNext = tk.Frame(master=self)
-       frmBtnNext.grid(row=8,column=4,padx=5, pady=5)
+       frmBtnToday = tk.Frame(master=self, borderwidth=1)
+       frmBtnToday.grid(row=8,column=3,padx=5, pady=5, sticky=tk.W)
+       btnToday = tk.Button(master=frmBtnToday, text="Today", command=self.showToday)
+       btnToday.pack()
+       
+       frmBtnNext = tk.Frame(master=self, borderwidth=1)
+       frmBtnNext.grid(row=8,column=4,padx=5, pady=5, sticky=tk.E)
        btnNext = tk.Button(master=frmBtnNext, text=">", command=self.showNextDate)
        btnNext.pack()
         
@@ -43,6 +48,14 @@ class Panchangam(tk.Tk):
         
         self.date += timedelta(days = 1)
      
+        self.container.set_date(self.date)
+        
+        return
+    
+    def showToday(self):
+        
+        self.date = date.today()
+        
         self.container.set_date(self.date)
         
         return
