@@ -1,19 +1,60 @@
 import tkinter as tk
-from datetime import date, timedelta
+from tkinter import ttk
+from datetime import date, timedelta, datetime
+from threading import Timer
+import time
 
 import requests
 from bs4 import BeautifulSoup
+import json
 
-class Panchangam(tk.Tk):
+DEBUG = False
+FETCH_WEB_DATA = True
+
+class RepeatedTimer(object):
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer     = None
+        self.interval   = interval
+        self.function   = function
+        self.args       = args
+        self.kwargs     = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+        
+        
+class PanchangamView(tk.Tk):
+    
+    def stop_refresh_timer(self):
+        
+        self.rt.stop()
+        self.destroy()
     
     def __init__(self, *args, **kwargs):
         
        tk.Tk.__init__(self, *args, **kwargs)
        
-       self.geometry("760x360")
        self.date = date.today()
        
-       self.container = dayFrame(self, self.date)
+       self.set_font_sizes()
+       
+       self.showing_today = True
+       
+       self.container = dayFrame(self, self.date, self.size_ratio)
 
        self.container.grid(row=1,column=1,columnspan=4)
        
@@ -22,32 +63,79 @@ class Panchangam(tk.Tk):
     
        frmBtnPrev = tk.Frame(master=self, borderwidth=1)
        frmBtnPrev.grid(row=8,column=1,padx=5, pady=5, sticky=tk.W)
-       btnPrev = tk.Button(master=frmBtnPrev, text="<", command=self.showPrevDate)
+       btnPrev = tk.Button(master=frmBtnPrev, text="<", command=self.showPrevDate, height=1, width=4)
+       btnPrev.config(font=("Helvetica Bold", int(12 * self.size_ratio)))
        btnPrev.pack()
        
        frmBtnToday = tk.Frame(master=self, borderwidth=1)
        frmBtnToday.grid(row=8,column=3,padx=5, pady=5, sticky=tk.W)
-       btnToday = tk.Button(master=frmBtnToday, text="Today", command=self.showToday)
+       btnToday = tk.Button(master=frmBtnToday, text="Today", command=self.showToday, height=1, width=20)
+       btnToday.config(font=("Helvetica Bold", int(12 * self.size_ratio)))
        btnToday.pack()
+       
+       self.btnToday = btnToday
+       self.originalButtonColor = self.btnToday.cget("background")
        
        frmBtnNext = tk.Frame(master=self, borderwidth=1)
        frmBtnNext.grid(row=8,column=4,padx=5, pady=5, sticky=tk.E)
-       btnNext = tk.Button(master=frmBtnNext, text=">", command=self.showNextDate)
+       btnNext = tk.Button(master=frmBtnNext, text=">", command=self.showNextDate, height=1, width=4)
+       btnNext.config(font=("Helvetica Bold",int(12 * self.size_ratio)))
        btnNext.pack()
         
+       self.rt = RepeatedTimer(5, self.refresh)
+       
+       self.protocol("WM_DELETE_WINDOW",self.stop_refresh_timer)
+   
+       
+    def set_font_sizes(self):
         
+        SCREEN_WIDTH, SCREEN_HEIGHT = self.winfo_screenwidth(), self.winfo_screenheight()
+        
+        if DEBUG == True:
+            print("Screen Size: {}x{}".format(SCREEN_WIDTH, SCREEN_HEIGHT))
+        
+        if SCREEN_WIDTH == 800 and SCREEN_HEIGHT == 480: # screen size that we designed for
+            
+            win_width = SCREEN_WIDTH
+            win_height = int(SCREEN_HEIGHT * 0.9)
+        else:
+            win_width = int(SCREEN_WIDTH)
+            win_height = int(SCREEN_WIDTH * 0.6)
+         
+            if win_height > SCREEN_HEIGHT:
+                win_height = int(SCREEN_HEIGHT * 0.8)
+                win_width = int(win_height * 2.2)
+        
+        self.geometry("{}x{}".format(win_width,win_height))
+        
+        if DEBUG == True:
+            print("Window Size: {}x{}".format(win_width, win_height))
+        
+        self.size_ratio = win_width/800
+        
+        if DEBUG == True:
+            print("size ratio: {}".format(self.size_ratio))
+    
     def showPrevDate(self):
         
         self.date -= timedelta(days = 1)
         
+        self.showing_today = False
+        
+        self.check_today()
+        
         self.container.set_date(self.date)
-       
+        
         return
 
     def showNextDate(self):
         
         self.date += timedelta(days = 1)
      
+        self.showing_today = False
+        
+        self.check_today()
+        
         self.container.set_date(self.date)
         
         return
@@ -56,9 +144,27 @@ class Panchangam(tk.Tk):
         
         self.date = date.today()
         
+        self.showing_today = True
+        
+        self.check_today()
+        
         self.container.set_date(self.date)
         
         return
+    
+    def check_today(self):
+        
+        if self.showing_today == False:
+            self.btnToday.configure(bg="red", fg="white")
+        else:
+            self.btnToday.configure(bg=self.originalButtonColor, fg="black")
+            
+    def refresh(self):
+        
+        # print("date = {}, showing today = {}".format(self.date, self.showing_today))
+        if self.date != date.today() and self.showing_today == True:
+            self.showToday()
+            
     
 class dayFrame(tk.Frame):
 
@@ -76,128 +182,191 @@ class dayFrame(tk.Frame):
     dataValues = []
     dataLabels = []
     
-    def __init__(self, parent, day):
+    
+    def __init__(self, parent, day, size_ratio):
         
         tk.Frame.__init__(self, parent)
         
         self.date = day
+        self.size_ratio = size_ratio
         
         self.frames = []
         
         self.show_fields()
         
-        self.fetch_data()
+        self.fetch_data_json()
         
-        self.show_data()
-        
+        self.show_json_data()
         
     def show_fields(self):
         
-        self.grid_columnconfigure(0, minsize=40, weight=1)
-        self.grid_columnconfigure(1, minsize=250, weight=1)
+        self.grid_columnconfigure(0, minsize=450 * self.size_ratio, weight=1)
+        self.grid_columnconfigure(1, minsize=150 * self.size_ratio, weight=1)
         
-        self.grid_columnconfigure(2, minsize=40, weight=1)
-        self.grid_columnconfigure(3, minsize=250, weight=1)
-        
-        self.grid_rowconfigure(4, minsize=30, weight=1)
-        
-        self.grid_rowconfigure(5, minsize=50, weight=1)
-        self.grid_rowconfigure(6, minsize=30, weight=1)
-        self.grid_rowconfigure(7, minsize=20, weight=1)
+        self.grid_columnconfigure(2, minsize=200 * self.size_ratio, weight=1)
         
         textCurrentDate = "Date"
         textTamilDate = "Tamil Date"
         textTamilDateDetails = "Tamil Date Details"
         
         frmDate = tk.Frame(master=self)
-        frmDate.grid(row=0,column=0, columnspan=4, padx=5, pady=5)
-        lblDate =  tk.Label(master=frmDate,text=textCurrentDate, justify=tk.LEFT)
-        lblDate.config(font=("Helvetica",40))
+        frmDate.grid(row=0,column=0, columnspan=1, rowspan=2, padx=5, pady=5)
+        lblDate =  tk.Label(master=frmDate,text=textCurrentDate, justify=tk.CENTER)
+        lblDate.config(font=("Helvetica",int(48 * self.size_ratio)))
         lblDate.pack()
         
         self.lblDate = lblDate
 
         frmTamilDate = tk.Frame(master=self)
-        frmTamilDate.grid(row=1,column=0, columnspan=4, padx=5, pady=5)
-        lblTamilDate =  tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.LEFT)
-        lblTamilDate.config(font=("Helvetica",20))
+        frmTamilDate.grid(row=2,column=0, columnspan=1, rowspan=2, padx=5, pady=5)
+        lblTamilDate =  tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.CENTER)
+        lblTamilDate.config(font=("Helvetica",int(36 * self.size_ratio)))
         lblTamilDate.pack()
         
         self.lblTamilDate = lblTamilDate
 
         frmTamilDateDetails = tk.Frame(master=self)
-        frmTamilDateDetails.grid(row=2,column=0, columnspan=4, padx=5, pady=5)
-        lblTamilDateDetails =  tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.LEFT)
-        lblTamilDateDetails.config(font=("Helvetica",16))
+        frmTamilDateDetails.grid(row=4,column=0, columnspan=1, rowspan=2, padx=5, pady=5)
+        lblTamilDateDetails =  tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=450 * self.size_ratio)
+        lblTamilDateDetails.config(font=("Helvetica",int(24 * self.size_ratio)))
         lblTamilDateDetails.pack()
         
         self.lblTamilDateDetails = lblTamilDateDetails
+    
+        frmRefreshTime = tk.Frame(master=self)
+        frmRefreshTime.grid(row=6,column=0, columnspan=1, padx=5, pady=5)
+        lblRefreshTime =  tk.Label(master=frmRefreshTime,text="", justify=tk.LEFT)
+        lblRefreshTime.config(font=("Helvetica",int(10 * self.size_ratio)))
+        lblRefreshTime.pack()
         
-        row_num=3
-        col_num=-1
+        self.lblRefreshTime = lblRefreshTime
+        
+        centerx_separator = ttk.Separator(self, orient='vertical')
+        centerx_separator.place(relx=0.55, rely=0.0, relwidth=0.1, relheight=1)
+
+        row_num=0
+        col_num=0
         
         for item in self.dataItems:
                   
             col_num += 1
-            frmItem = tk.Frame(master=self,relief=tk.FLAT,borderwidth=1)
+            frmItem = tk.Frame(master=self,relief=tk.FLAT, borderwidth=1)
             frmItem.grid(row=row_num,column=col_num, padx=5, pady=5, sticky=tk.W)
-            lblItem = tk.Label(master=frmItem,text=item, justify=tk.LEFT, wraplength=120)
-            lblItem.config(font="Helvetica 12 bold") 
+            lblItem = tk.Label(master=frmItem,text=item, justify=tk.LEFT, wraplength=120 * self.size_ratio)
+            lblItem.config(font=("Helvetica", int(14 * self.size_ratio), "bold"))
             lblItem.pack()
             
             col_num += 1
-            frmItemData = tk.Frame(master=self,relief=tk.FLAT,borderwidth=1)
+            frmItemData = tk.Frame(master=self,relief=tk.FLAT, borderwidth=1)
             frmItemData.grid(row=row_num,column=col_num, padx=5, pady=5, sticky=tk.W)
-            lblItemData = tk.Label(master=frmItemData,text="", justify=tk.LEFT, wraplength=250)
-            lblItemData.config(font="Helvetica 12") 
+            lblItemData = tk.Label(master=frmItemData,text="", justify=tk.LEFT, wraplength=180 * self.size_ratio)
+            lblItemData.config(font=("Helvetica", int(14 * self.size_ratio)))
             lblItemData.pack()
             
             self.dataLabels.append(lblItemData)
             
-            if col_num == 3:
+            if col_num == 2:
                 row_num += 1
-                col_num = -1
-            
+                col_num = 0
+       
     def set_date(self,date):
         
         self.date = date
-        self.fetch_data_for_date(date)
-        self.show_data()
+        self.fetch_json_data_for_date(date)
+        self.show_json_data()
         
-    def fetch_data(self):
+    def fetch_data_json(self):
         
-        self.fetch_data_for_date(self.date)
+        self.fetch_json_data_for_date(self.date)
         
-    def fetch_data_for_date(self, date):
+    def fetch_json_data_for_date(self, date):
         
-        dateValue = date.strftime("%d/%m/%Y")
+        dateValue = date.strftime("%m-%d-%Y")
         
-        URL = "https://www.drikpanchang.com/tamil/tamil-month-panchangam.html?geoname-id=4684888&date=" + dateValue
-
-        page = requests.get(URL)
-
-        self.soup = BeautifulSoup(page.content, "html.parser")
+        URL = "http://raspberrypia:1337/" + dateValue + "/json"
         
         self.textCurrentDate = self.date.strftime("%a %b %d, %Y")
         
+        self.textTamilDate = ""
+        
+        self.textTamilDateDetails = ""
+        
+        if FETCH_WEB_DATA == True:
+            self.json_data = self.fetch_data_from_web(date)
+        else:
+            self.json_data = json.loads(requests.get(URL).text)
+        
+    def fetch_data_from_web(self, date):
+        
+        URL = "https://www.drikpanchang.com/tamil/tamil-month-panchangam.html?geoname-id=4684888&date="
+        
+        dateValue = date.strftime("%d/%m/%Y")
+        
+        dateStr = date.strftime("%Y-%m-%d")
+        
+        response = {}
+        
+        URL_string = URL + dateValue
+
+        page = requests.get(URL_string)
+
+        self.soup = BeautifulSoup(page.content, "html.parser")
+        
+        response["str_date"] = dateStr
+
+        response["date_text"] = self.date.strftime("%d %b %Y")
+        
+        prevDate = self.date - timedelta(days = 1)
+        nextDate = self.date + timedelta(days = 1)
+        
+        response["prev_date_text"] = prevDate.strftime("%a %b %d, %Y")
+        response["next_date_text"] = nextDate.strftime("%a %b %d, %Y")
+        
+        
         divTamilDate = self.soup.find("div", {"class": "dpPHeaderLeftTitle"})
 
-        self.textTamilDate = divTamilDate.text
-
+        response["date_tamil"]= divTamilDate.text
+        
         detailDivs = divTamilDate.find_next_siblings("div")
 
-        self.textTamilDateDetails = ""
+        textTamilDateDetails = ""
 
         for div in detailDivs:
-            self.textTamilDateDetails += div.text + " "
+            textTamilDateDetails += div.text + " "
+            
+        response["tamil_date_details"] = textTamilDateDetails
+        response["refreshed_date"] = datetime.now()
         
         self.dataValues = []
         
         for item in self.dataItems:
-            item_data = self.find_data(item)
+            item_data = self.find_data_web(item)
             self.dataValues.append(item_data)
-                
+            
+            response[item] = item_data
+            
+        return response
+                    
     def find_data(self, str_type):
+
+        return_text = ""
+        results = self.soup.find(text=str_type).parent
+        
+        if results.name != "span":
+            results = results.parent
+
+        spans = results.find_next_siblings("span")
+
+        for span in spans:
+            return_text += span.text
+            
+        return return_text
+        
+    def fetch_data(self):
+        
+        self.fetch_data_for_date(self.date)
+                
+    def find_data_web(self, str_type):
     
         return_text = ""
         results = self.soup.find(text=str_type).parent
@@ -222,7 +391,20 @@ class dayFrame(tk.Frame):
         for idx, item in enumerate(self.dataItems):
         
             self.dataLabels[idx].configure(text=self.dataValues[idx])
-        
             
-app = Panchangam()
+    def show_json_data(self):
+        
+        self.lblDate.configure(text=self.json_data["date_text"])
+        self.lblTamilDate.configure(text=self.json_data["date_tamil"])
+        self.lblTamilDateDetails.configure(text=self.json_data["tamil_date_details"])
+                            
+        for idx, item in enumerate(self.dataItems):
+        
+            self.dataLabels[idx].configure(text=self.json_data[item])
+            
+        self.lblRefreshTime.configure(text="Last refreshed at {0}".format(datetime.now().strftime("%m/%d/%Y, %I:%M:%S %p")))
+    
+app = PanchangamView()
+
 app.mainloop()
+
