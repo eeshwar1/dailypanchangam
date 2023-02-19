@@ -8,7 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
-
+DEBUG = False
+FETCH_WEB_DATA = True
 
 class RepeatedTimer(object):
     def __init__(self, interval, function, *args, **kwargs):
@@ -90,7 +91,8 @@ class PanchangamView(tk.Tk):
         
         SCREEN_WIDTH, SCREEN_HEIGHT = self.winfo_screenwidth(), self.winfo_screenheight()
         
-        print("Screen Size: {}x{}".format(SCREEN_WIDTH, SCREEN_HEIGHT))
+        if DEBUG == True:
+            print("Screen Size: {}x{}".format(SCREEN_WIDTH, SCREEN_HEIGHT))
         
         if SCREEN_WIDTH == 800 and SCREEN_HEIGHT == 480: # screen size that we designed for
             
@@ -106,11 +108,13 @@ class PanchangamView(tk.Tk):
         
         self.geometry("{}x{}".format(win_width,win_height))
         
-        print("Window Size: {}x{}".format(win_width, win_height))
+        if DEBUG == True:
+            print("Window Size: {}x{}".format(win_width, win_height))
         
         self.size_ratio = win_width/800
         
-        print("size ratio: {}".format(self.size_ratio))
+        if DEBUG == True:
+            print("size ratio: {}".format(self.size_ratio))
     
     def showPrevDate(self):
         
@@ -287,13 +291,82 @@ class dayFrame(tk.Frame):
         
         self.textTamilDateDetails = ""
         
-        self.json_data = json.loads(requests.get(URL).text)
+        if FETCH_WEB_DATA == True:
+            self.json_data = self.fetch_data_from_web(date)
+        else:
+            self.json_data = json.loads(requests.get(URL).text)
+        
+    def fetch_data_from_web(self, date):
+        
+        URL = "https://www.drikpanchang.com/tamil/tamil-month-panchangam.html?geoname-id=4684888&date="
+        
+        dateValue = date.strftime("%d/%m/%Y")
+        
+        dateStr = date.strftime("%Y-%m-%d")
+        
+        response = {}
+        
+        URL_string = URL + dateValue
+
+        page = requests.get(URL_string)
+
+        self.soup = BeautifulSoup(page.content, "html.parser")
+        
+        response["str_date"] = dateStr
+
+        response["date_text"] = self.date.strftime("%d %b %Y")
+        
+        prevDate = self.date - timedelta(days = 1)
+        nextDate = self.date + timedelta(days = 1)
+        
+        response["prev_date_text"] = prevDate.strftime("%a %b %d, %Y")
+        response["next_date_text"] = nextDate.strftime("%a %b %d, %Y")
+        
+        
+        divTamilDate = self.soup.find("div", {"class": "dpPHeaderLeftTitle"})
+
+        response["date_tamil"]= divTamilDate.text
+        
+        detailDivs = divTamilDate.find_next_siblings("div")
+
+        textTamilDateDetails = ""
+
+        for div in detailDivs:
+            textTamilDateDetails += div.text + " "
+            
+        response["tamil_date_details"] = textTamilDateDetails
+        response["refreshed_date"] = datetime.now()
+        
+        self.dataValues = []
+        
+        for item in self.dataItems:
+            item_data = self.find_data_web(item)
+            self.dataValues.append(item_data)
+            
+            response[item] = item_data
+            
+        return response
+                    
+    def find_data(self, str_type):
+
+        return_text = ""
+        results = self.soup.find(text=str_type).parent
+        
+        if results.name != "span":
+            results = results.parent
+
+        spans = results.find_next_siblings("span")
+
+        for span in spans:
+            return_text += span.text
+            
+        return return_text
         
     def fetch_data(self):
         
         self.fetch_data_for_date(self.date)
                 
-    def find_data(self, str_type):
+    def find_data_web(self, str_type):
     
         return_text = ""
         results = self.soup.find(text=str_type).parent
