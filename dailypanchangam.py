@@ -221,13 +221,13 @@ class dayFrame(tk.Frame):
         frmTamilDate = tk.Frame(master=self)
         frmTamilDate.grid(row=2,column=0, columnspan=1, rowspan=2, padx=5, pady=5)
         lblTamilDate =  tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.CENTER, wraplength=420 * self.size_ratio)
-        lblTamilDate.config(font=("Helvetica",int(30 * self.size_ratio)))
+        lblTamilDate.config(font=("Helvetica",int(24 * self.size_ratio)))
         lblTamilDate.pack()
         
         self.lblTamilDate = lblTamilDate
 
         frmTamilDateDetails = tk.Frame(master=self)
-        frmTamilDateDetails.grid(row=4,column=0, columnspan=1, rowspan=3, padx=5, pady=5)
+        frmTamilDateDetails.grid(row=4,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
         lblTamilDateDetails =  tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=420 * self.size_ratio)
         lblTamilDateDetails.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblTamilDateDetails.pack()
