@@ -156,7 +156,7 @@ class PanchangamView(tk.Tk):
     def check_today(self):
         
         if self.showing_today == False:
-            self.btnToday.configure(bg="red", fg="white")
+            self.btnToday.configure(bg="blue", fg="white")
         else:
             self.btnToday.configure(bg=self.originalButtonColor, fg="black")
             
@@ -211,7 +211,7 @@ class dayFrame(tk.Frame):
         textTamilDateDetails = "Tamil Date Details"
         
         frmDate = tk.Frame(master=self)
-        frmDate.grid(row=0,column=0, columnspan=1, rowspan=2, padx=5, pady=5)
+        frmDate.grid(row=0,column=0, columnspan=1, rowspan=2, padx=5, pady=20)
         lblDate =  tk.Label(master=frmDate,text=textCurrentDate, justify=tk.CENTER)
         lblDate.config(font=("Helvetica",int(36 * self.size_ratio)))
         lblDate.pack()
@@ -220,7 +220,7 @@ class dayFrame(tk.Frame):
 
         frmTamilDate = tk.Frame(master=self)
         frmTamilDate.grid(row=2,column=0, columnspan=1, rowspan=2, padx=5, pady=5)
-        lblTamilDate =  tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.CENTER)
+        lblTamilDate =  tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.CENTER, wraplength=420 * self.size_ratio)
         lblTamilDate.config(font=("Helvetica",int(24 * self.size_ratio)))
         lblTamilDate.pack()
         
@@ -229,7 +229,7 @@ class dayFrame(tk.Frame):
         frmTamilDateDetails = tk.Frame(master=self)
         frmTamilDateDetails.grid(row=4,column=0, columnspan=1, rowspan=2, padx=5, pady=5)
         lblTamilDateDetails =  tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=420 * self.size_ratio)
-        lblTamilDateDetails.config(font=("Helvetica",int(24 * self.size_ratio)))
+        lblTamilDateDetails.config(font=("Helvetica",int(16 * self.size_ratio)))
         lblTamilDateDetails.pack()
         
         self.lblTamilDateDetails = lblTamilDateDetails
@@ -304,7 +304,8 @@ class dayFrame(tk.Frame):
         
             self.dataLabels[idx].configure(text=self.json_data[item])
             
-        self.lblRefreshTime.configure(text="Last refreshed at {0}".format(datetime.now().strftime("%m/%d/%Y, %I:%M:%S %p")))
+        # self.lblRefreshTime.configure(text="Last refreshed at {0}".format(datetime.now().strftime("%m/%d/%Y, %I:%M:%S %p")))
+        self.lblRefreshTime.configure(text="Last refreshed at {0}".format(self.json_data["last_refresh"]))
     
 app = PanchangamView()
 
