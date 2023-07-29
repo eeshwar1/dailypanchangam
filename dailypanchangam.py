@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import *
 from datetime import date, timedelta, datetime
 from threading import Timer
 import time
@@ -11,6 +12,7 @@ import json
 import panchangam
 
 DEBUG = False
+            
 
 class RepeatedTimer(object):
     def __init__(self, interval, function, *args, **kwargs):
@@ -70,7 +72,7 @@ class PanchangamView(tk.Tk):
        
        frmBtnToday = tk.Frame(master=self, borderwidth=1)
        frmBtnToday.grid(row=8,column=3,padx=5, pady=5, sticky=tk.W)
-       btnToday = tk.Button(master=frmBtnToday, text="Today", command=self.showToday, height=1, width=20)
+       btnToday = tk.Button(master=frmBtnToday, text="Today", command=self.showToday, height=1, width=10)
        btnToday.config(font=("Helvetica Bold", int(12 * self.size_ratio)))
        btnToday.pack()
        
@@ -177,12 +179,17 @@ class dayFrame(tk.Frame):
     
     frmTamilDateDetails = None
     lblTamilDateDetails = None
+    
+    locationPopup = None
    
     dataItems = ["Sunrise","Sunset","Nakshathram","Tithi",
                  "Rahu Kalam","Gulikai Kalam","Yamaganda"]
     dataValues = []
     dataLabels = []
     
+    locations = []
+    location_ids = []
+    location_id = "4684888"
     
     def __init__(self, parent, day, size_ratio):
         
@@ -213,7 +220,7 @@ class dayFrame(tk.Frame):
         frmDate = tk.Frame(master=self)
         frmDate.grid(row=0,column=0, columnspan=1, rowspan=2, padx=5, pady=20)
         lblDate =  tk.Label(master=frmDate,text=textCurrentDate, justify=tk.CENTER)
-        lblDate.config(font=("Helvetica",int(40 * self.size_ratio)))
+        lblDate.config(font=("Helvetica",int(40 * self.size_ratio),"bold"))
         lblDate.pack()
         
         self.lblDate = lblDate
@@ -233,12 +240,32 @@ class dayFrame(tk.Frame):
         lblTamilDateDetails.pack()
         
         self.lblTamilDateDetails = lblTamilDateDetails
+        
+        # Create a Tkinter variable
+        location = StringVar(self)
+
+        # Dictionary with options
+        locations = { 'New York','Dallas','Denver','Los Angeles','Trivandrum'}
+        location.set('Dallas') # set the default option
+
+        locationPopupStyle = ttk.Style()
+        locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(8 * self.size_ratio)),width=int(10 * self.size_ratio))
+        frmLocationPopup = tk.Frame(master=self)
+        frmLocationPopup.grid(row=5, column=0, padx=20, pady=5, sticky=tk.EW)
+        locationPopup = ttk.OptionMenu(frmLocationPopup, location, *locations, style="my.TMenubutton", command=self.set_location)
+        locationPopup.pack()
+        
+        self.locationPopup = locationPopup
+        
+        locationPopup["menu"].config(font=("Helvetica",int(8 * self.size_ratio)))
+        
     
         frmRefreshTime = tk.Frame(master=self)
         frmRefreshTime.grid(row=6,column=0, columnspan=1, padx=5, pady=5)
         lblRefreshTime =  tk.Label(master=frmRefreshTime,text="", justify=tk.LEFT)
         lblRefreshTime.config(font=("Helvetica",int(10 * self.size_ratio)))
         lblRefreshTime.pack()
+        
         
         self.lblRefreshTime = lblRefreshTime
         
@@ -282,23 +309,34 @@ class dayFrame(tk.Frame):
         
     def fetch_json_data_for_date(self, date):
         
-        self.json_data = json.loads(panchangam.get_details_for_date(date))
-
-    def show_data(self):
+        self.json_data = json.loads(panchangam.get_details_for_date(date, self.location_id))
         
-        self.lblDate.configure(text=self.textCurrentDate)
-        self.lblTamilDate.configure(text=self.textTamilDate)
-        self.lblTamilDateDetails.configure(text=self.textTamilDateDetails)
-                            
-        for idx, item in enumerate(self.dataItems):
+    def set_location(self, location):
         
-            self.dataLabels[idx].configure(text=self.dataValues[idx])
+        self.location_id = self.location_ids[location]
+        # print("Location changed to " + location + " location id set to " + self.location_id)
+        self.fetch_json_data_for_date(self.date)
+        self.show_json_data()
             
     def show_json_data(self):
         
         self.lblDate.configure(text=self.json_data["date_text"])
         self.lblTamilDate.configure(text=self.json_data["date_tamil"])
         self.lblTamilDateDetails.configure(text=self.json_data["tamil_date_details"])
+        
+        location_ids={}
+        location_names={}
+        locations = []
+        for location in self.json_data["locations"]:
+            locations.append(location["name"])
+            location_ids[location["name"]] = location["id"]
+            location_names[location["id"]] = location["name"]
+        
+        self.locations = locations
+        self.location_ids = location_ids
+        self.location_id = self.json_data["geo_location"]
+        
+        self.locationPopup.set_menu(location_names[self.location_id], *self.locations)
                             
         for idx, item in enumerate(self.dataItems):
         
