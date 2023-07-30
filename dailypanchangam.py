@@ -5,13 +5,11 @@ from datetime import date, timedelta, datetime
 from threading import Timer
 import time
 
-import requests
-from bs4 import BeautifulSoup
 import json
 
 import panchangam
 
-DEBUG = True
+DEBUG = False
             
 
 class RepeatedTimer(object):
