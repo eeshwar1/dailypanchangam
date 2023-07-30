@@ -246,7 +246,7 @@ class dayFrame(tk.Frame):
         locations=[]
 
         locationPopupStyle = ttk.Style()
-        locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(11 * self.size_ratio)),width=int(22 * self.size_ratio))
+        locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(11 * self.size_ratio)),width=min(30,int(22 * self.size_ratio)))
         frmLocationPopup = tk.Frame(master=self)
         frmLocationPopup.grid(row=5, column=0, padx=5, pady=5, sticky=tk.EW)
         locationPopup = ttk.OptionMenu(frmLocationPopup, location, *locations, style="my.TMenubutton", command=self.set_location)
