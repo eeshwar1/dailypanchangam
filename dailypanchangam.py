@@ -11,7 +11,7 @@ import json
 
 import panchangam
 
-DEBUG = False
+DEBUG = True
             
 
 class RepeatedTimer(object):
