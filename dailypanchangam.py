@@ -243,21 +243,18 @@ class dayFrame(tk.Frame):
         
         # Create a Tkinter variable
         location = StringVar(self)
-
-        # Dictionary with options
-        locations = { 'New York','Dallas','Denver','Los Angeles','Trivandrum'}
-        location.set('Dallas') # set the default option
+        locations=[]
 
         locationPopupStyle = ttk.Style()
-        locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(12 * self.size_ratio)),width=int(18 * self.size_ratio))
+        locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(11 * self.size_ratio)),width=int(18 * self.size_ratio))
         frmLocationPopup = tk.Frame(master=self)
-        frmLocationPopup.grid(row=5, column=0, padx=20, pady=5, sticky=tk.EW)
+        frmLocationPopup.grid(row=5, column=0, padx=5, pady=5, sticky=tk.EW)
         locationPopup = ttk.OptionMenu(frmLocationPopup, location, *locations, style="my.TMenubutton", command=self.set_location)
         locationPopup.pack()
         
         self.locationPopup = locationPopup
         
-        locationPopup["menu"].config(font=("Helvetica",int(12 * self.size_ratio)))
+        locationPopup["menu"].config(font=("Helvetica",int(11 * self.size_ratio)))
         
     
         frmRefreshTime = tk.Frame(master=self)
