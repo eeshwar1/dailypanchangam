@@ -1,5 +1,6 @@
 
 from datetime import date, timedelta, datetime
+import time
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -13,6 +14,7 @@ __locations = [ {"id": "5128581", "name": "New York, United States"},
                 {"id": "5419384", "name": "Denver, United States"},
                 {"id": "5368361", "name": "Los Angeles, United States"},
                 {"id": "1254163", "name": "Thiruvananthapuram, India"},
+                {"id": "1264527", "name": "Chennai, India"},
                 {"id": "2643743", "name": "London, United Kingdom"} ]
 
 def get_details(location=__DEFAULT_LOCATION):
@@ -40,12 +42,7 @@ def __fetch_data_from_web(date, location):
 
     URL_string = URL + dateValue
 
-    try: 
-        page = requests.get(URL_string)
-    except requests.exceptions.Timeout:
-        sleep(1)
-        page = requests.get(URL_string)
-        
+    page = get_page_data(URL_string)
 
     soup = BeautifulSoup(page.content, "html.parser")
 
@@ -61,8 +58,6 @@ def __fetch_data_from_web(date, location):
 
     divTamilDate = soup.find("div", {"class": "dpPHeaderLeftTitle"})
 
-    
-
     detailDivs = divTamilDate.find_next_siblings("div")
 
     textTamilDateDetails = ""
@@ -74,17 +69,21 @@ def __fetch_data_from_web(date, location):
     response["last_refresh"] = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
 
     response["geo_location"] = location
-    response["locations"] = __locations
 
-    response["num_locations"] = len(__locations)
+    response["locations"] = __locations
 
     for item in dataItems:
         item_data = __find_data_web(soup, item)
         
+        if item == "Tithi":
+            item_data = __tamil_to_tamizh(item_data)
+
         response[item] = item_data
     
     shaka_samvat = __find_data_web(soup, "Shaka Samvat")
     response["date_tamil"]= divTamilDate.text + ", " + shaka_samvat + ", " + yugam
+
+    response["gowri_details"] = __fetch_gowri_details_for_date(date, location)["data"]
 
     return response
         
@@ -115,7 +114,131 @@ def __edit_tamil_date_details(detail_text):
     else:
         edited_detail_text = detail_text
 
-    return (edited_detail_text.strip(), yugam)
+    return (__tamil_to_tamizh(edited_detail_text.strip()), yugam)
+
+def get_page_data(URL_string):
+
+    try: 
+        page = requests.get(URL_string)
+    except requests.exceptions.Timeout:
+        time.sleep(1)
+        page = requests.get(URL_string)
+
+    return page
+
+def get_gowri_details(location=__DEFAULT_LOCATION):
+    
+    return json.dumps(__fetch_gowri_details_for_date(date.today(), location))
+
+def get_gowri_details_for_date(date, location=__DEFAULT_LOCATION):
+    
+    return json.dumps(__fetch_gowri_details_for_date(date, location))
+
+def __fetch_gowri_details_for_date(date, location):
+
+    URL_BASE = "https://www.drikpanchang.com/tamil/tamil-gowri-panchangam.html?"
+
+    URL = URL_BASE + "geoname-id="+ location + "&date="
+
+    dateValue = date.strftime("%d/%m/%Y")
+
+    response = {}
+
+    URL_string = URL + dateValue
+
+    page = get_page_data(URL_string)
+
+    soup = BeautifulSoup(page.content, "html.parser")
+
+    divMuhurthaCards = soup.find_all("div", {"class": "dpMuhurtaCard"})
+
+    muhurthamData = []
+
+    for muhurthamCard in divMuhurthaCards:
+        muhurthamData.append(__get_muhurtham_data(muhurthamCard))
+
+    response["data"] = muhurthamData
+    
+    return response
+
+
+def __get_muhurtham_data(muhurthamCard):
+ 
+    muhurthamDataItem = {}
+
+    muhurthamNameSpan = muhurthamCard.findChild("span")
+    
+    muhurthamDataItem["type"]  = muhurthamNameSpan.text
+    
+    muhurthamTimeSpan = muhurthamNameSpan.find_parent("div").next_sibling.findChild("span")
+    
+    muhurthamDataItem["time"] = muhurthamTimeSpan.text
+
+    divMuhurthaRows = muhurthamCard.findChildren("div", { "class": "dpMuhurtaRow" })
+
+    muhurthamList = []
+    muhurthamItem = {}
+
+    for divMuhurthaRow in divMuhurthaRows:
+        divMuhurthaName = divMuhurthaRow.findChild("div", { "class": "dpMuhurtaName" })
+        divMuhurthaTime = divMuhurthaRow.findChild("div", { "class": "dpMuhurtaTime" })
+
+        muhurthamItem = {}
+        muhurthamItem["name"] = divMuhurthaName.findChild("span").text
+        muhurthaTimeSpansRoot = divMuhurthaTime.findChild("span")
+        muhurthaTimeSpans = muhurthaTimeSpansRoot.findChildren("<span>", recursive=False)
+
+        muhurthamName = muhurthamItem["name"]
+
+
+        if muhurthamName.endswith("Good") or \
+        muhurthamName.endswith("Best") or \
+        muhurthamName.endswith("Gain") or \
+        muhurthamName.endswith("Wealth"):
+            muhurthamItem["tag"] = "good"
+        else:
+            muhurthamItem["tag"] = "bad"
+
+        muhurthaTime = muhurthaTimeSpansRoot.text
+
+        for muhurthaTimeSpan in muhurthaTimeSpans:
+            print(muhurthaTimeSpan)
+            muhurthaTime += muhurthaTimeSpan.text
+
+        muhurthamItem["time"] = (muhurthaTime)
+
+        muhurthamList.append(muhurthamItem)
+    
+    muhurthamDataItem["muhurtham_list"]  = muhurthamList
+    return muhurthamDataItem
+
+def __tamil_to_tamizh(text):
+
+    output_text = text
+    __tithi_mapping = { 
+            "Pirathamai": "Prathamai",
+            "Thuthiyai": "Dwithiyai",
+            "Thiruthiyai": "Thrithiyai",
+            "Sathurthi": "Chathurthi",
+            "Panjami": "Panchami",
+            "Shasti": "Shashti",
+            "Sapthami": "Sapthami",
+            "Astami": "Ashtami",
+            "Navami": "Navami",
+            "Thasami": "Dashami",
+            "Egadashi": "Ekadashi",
+            "Duvadasi": "Dwadashi",
+            "Thirayodasi": "Thrayodashi",
+            "Sathuradasi": "Chathurdashi",
+            "Pournami": "Pournami",
+            "Amavasai": "Ammavasai"
+
+    }
+
+    for word, replacement in __tithi_mapping.items():
+        output_text = output_text.replace(word, replacement)
+
+    return output_text
 
 if __name__ == "__main__":
   data = get_details()
