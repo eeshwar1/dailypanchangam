@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
+from tkcalendar import DateEntry
 from datetime import date, timedelta, datetime
 from threading import Timer
 import time
@@ -76,8 +77,8 @@ class PanchangamView(tk.Tk):
        btnToday.pack()
        
        self.btnToday = btnToday
-       self.originalButtonColor = self.btnToday.cget("background")
-       
+       self.originalButtonColor = self.btnToday.cget("background")  
+
        frmBtnNext = tk.Frame(master=self, borderwidth=1)
        frmBtnNext.grid(row=8,column=3,padx=5, pady=5, sticky=tk.E)
        btnNext = tk.Button(master=frmBtnNext, text=">", command=self.showNextDate, height=1, width=3)
@@ -219,32 +220,32 @@ class dayFrame(tk.Frame):
         
         frmDate = tk.Frame(master=self)
         frmDate.grid(row=0,column=0, columnspan=1, rowspan=2, padx=5, pady=20)
-        lblDate =  tk.Label(master=frmDate,text=textCurrentDate, justify=tk.CENTER, wraplength=350 * self.size_ratio)
-        lblDate.config(font=("Helvetica",int(30 * self.size_ratio),"bold"))
+        lblDate = tk.Label(master=frmDate,text=textCurrentDate, justify=tk.CENTER, wraplength=350 * self.size_ratio)
+        lblDate.config(font=("Helvetica",int(48 * self.size_ratio),"bold"))
         lblDate.pack()
         
         self.lblDate = lblDate
 
         frmTamilDate = tk.Frame(master=self)
         frmTamilDate.grid(row=0,column=1, columnspan=1, rowspan=2, padx=5, pady=5)
-        lblTamilDate =  tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.CENTER, wraplength=420 * self.size_ratio)
-        lblTamilDate.config(font=("Helvetica",int(40 * self.size_ratio),"bold"))
+        lblTamilDate = tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.CENTER, wraplength=420 * self.size_ratio)
+        lblTamilDate.config(font=("Helvetica",int(48 * self.size_ratio),"bold"))
         lblTamilDate.pack()
         
         self.lblTamilDate = lblTamilDate
 
         frmTamilDateDetails = tk.Frame(master=self)
         frmTamilDateDetails.grid(row=2,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
-        lblTamilDateDetails =  tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblTamilDateDetails.config(font=("Helvetica",int(20 * self.size_ratio)))
+        lblTamilDateDetails = tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
+        lblTamilDateDetails.config(font=("Helvetica",int(24 * self.size_ratio)))
         lblTamilDateDetails.pack()
         
         self.lblTamilDateDetails = lblTamilDateDetails
 
         frmTamilYearDetails = tk.Frame(master=self)
         frmTamilYearDetails.grid(row=3,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
-        lblTamilYearDetails =  tk.Label(master=frmTamilYearDetails,text=textTamilYearDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblTamilYearDetails.config(font=("Helvetica",int(20 * self.size_ratio)))
+        lblTamilYearDetails = tk.Label(master=frmTamilYearDetails,text=textTamilYearDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
+        lblTamilYearDetails.config(font=("Helvetica",int(24 * self.size_ratio)))
         lblTamilYearDetails.pack()
         
         self.lblTamilYearDetails = lblTamilYearDetails
@@ -254,7 +255,7 @@ class dayFrame(tk.Frame):
 
         frmDateDetails1 = tk.Frame(master=self)
         frmDateDetails1.grid(row=2,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
-        lblDateDetails1 =  tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=800 * self.size_ratio)
+        lblDateDetails1 = tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=800 * self.size_ratio)
         lblDateDetails1.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblDateDetails1.pack()
         
@@ -264,8 +265,8 @@ class dayFrame(tk.Frame):
 
         frmDateDetails2 = tk.Frame(master=self)
         frmDateDetails2.grid(row=3,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
-        lblDateDetails2 =  tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.CENTER, wraplength=800 * self.size_ratio)
-        lblDateDetails2.config(font=("Helvetica",int(14 * self.size_ratio)))
+        lblDateDetails2 = tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.CENTER, wraplength=800 * self.size_ratio)
+        lblDateDetails2.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblDateDetails2.pack()
         
         self.lblDateDetails2 = lblDateDetails2
@@ -274,7 +275,7 @@ class dayFrame(tk.Frame):
 
         frmDateDetails3 = tk.Frame(master=self)
         frmDateDetails3.grid(row=4,column=0, columnspan=2, rowspan=1, padx=10, pady=5)
-        lblDateDetails3 =  tk.Label(master=frmDateDetails3,text=textDateDetails3, justify=tk.CENTER, wraplength=800 * self.size_ratio)
+        lblDateDetails3 = tk.Label(master=frmDateDetails3,text=textDateDetails3, justify=tk.CENTER, wraplength=800 * self.size_ratio)
         lblDateDetails3.config(font=("Helvetica",int(14 * self.size_ratio)))
         lblDateDetails3.pack()
         
@@ -295,16 +296,29 @@ class dayFrame(tk.Frame):
         
         locationPopup["menu"].config(font=("Helvetica",int(11 * self.size_ratio)))
         
+        # frmdatePicker = tk.Frame(master=self)
+        # frmdatePicker.grid(row=10, column=1, padx=5, pady=5)
+        # datePicker = DateEntry(master=frmdatePicker, width=8, background='darkblue', foreground='white', borderwidth=2)
+        # datePicker.config(font=("Helvetica Bold", int(10 * self.size_ratio)))
+        # datePicker.pack()
+        # datePicker.bind("<<DateEntrySelected>>", self.set_new_date)
+
+        # self.datePicker = datePicker 
     
         frmRefreshTime = tk.Frame(master=self)
         frmRefreshTime.grid(row=12,column=0, columnspan=2, padx=5, pady=5)
-        lblRefreshTime =  tk.Label(master=frmRefreshTime,text="", justify=tk.LEFT)
+        lblRefreshTime = tk.Label(master=frmRefreshTime,text="", justify=tk.LEFT)
         lblRefreshTime.config(font=("Helvetica",int(10 * self.size_ratio)))
         lblRefreshTime.pack()
         
         self.lblRefreshTime = lblRefreshTime
 
-      
+    def set_new_date(self, date):
+
+        new_date = self.datePicker.get_date()
+        print(f"new date set: {self.datePicker.get_date()}")
+        self.set_date(new_date)
+        
     def set_date(self,date):
         
         self.date = date
