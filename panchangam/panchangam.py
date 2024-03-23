@@ -15,6 +15,16 @@ __locations = [ {"id": "5128581", "name": "New York, United States"},
                 {"id": "1254163", "name": "Thiruvananthapuram, India"},
                 {"id": "2643743", "name": "London, United Kingdom"} ]
 
+def get_locations():
+
+    response = {}
+
+    response["locations"] = __locations
+
+    response["num_locations"] = len(__locations)
+
+    return json.dumps(response)
+
 def get_details(location=__DEFAULT_LOCATION):
     
     return json.dumps(__fetch_data_from_web(date.today(), location))
@@ -60,8 +70,6 @@ def __fetch_data_from_web(date, location):
     response["next_date_text"] = nextDate.strftime("%a %b %d, %Y")
 
     divTamilDate = soup.find("div", {"class": "dpPHeaderLeftTitle"})
-
-    
 
     detailDivs = divTamilDate.find_next_siblings("div")
 
@@ -116,6 +124,8 @@ def __edit_tamil_date_details(detail_text):
         edited_detail_text = detail_text
 
     return (edited_detail_text.strip(), yugam)
+
+
 
 if __name__ == "__main__":
   data = get_details()
