@@ -207,7 +207,7 @@ class dayFrame(ttk.Frame):
         
         hscrollbar = ttk.Scrollbar(self, orient=HORIZONTAL)
         hscrollbar.pack(fill=X, side=BOTTOM, expand=TRUE)
-        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=win_width * 0.99, height=win_height * 0.9,
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=win_width * 0.95, height=win_height * 0.8,
                            yscrollcommand=vscrollbar.set, xscrollcommand=hscrollbar.set)
         self.canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
         vscrollbar.config(command=self.canvas.yview)
