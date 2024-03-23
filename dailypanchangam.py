@@ -227,7 +227,7 @@ class dayFrame(tk.Frame):
         frmDate = tk.Frame(master=self)
         frmDate.grid(row=0,column=0, columnspan=1, rowspan=1, padx=5, pady=20)
         lblDate = tk.Label(master=frmDate,text=textCurrentDate, justify=tk.CENTER, wraplength=350 * self.size_ratio)
-        lblDate.config(font=("Helvetica",int(30 * self.size_ratio),"bold"))
+        lblDate.config(font=("Helvetica",int(32 * self.size_ratio),"bold"))
         lblDate.pack()
         
         self.lblDate = lblDate
@@ -243,7 +243,7 @@ class dayFrame(tk.Frame):
         frmTamilDateDetails = tk.Frame(master=self)
         frmTamilDateDetails.grid(row=1,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
         lblTamilDateDetails = tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblTamilDateDetails.config(font=("Helvetica",int(20 * self.size_ratio)))
+        lblTamilDateDetails.config(font=("Helvetica",int(30 * self.size_ratio)))
         lblTamilDateDetails.pack()
         
         self.lblTamilDateDetails = lblTamilDateDetails
@@ -251,7 +251,7 @@ class dayFrame(tk.Frame):
         frmTamilYearDetails = tk.Frame(master=self)
         frmTamilYearDetails.grid(row=2,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
         lblTamilYearDetails = tk.Label(master=frmTamilYearDetails,text=textTamilYearDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblTamilYearDetails.config(font=("Helvetica",int(20 * self.size_ratio)))
+        lblTamilYearDetails.config(font=("Helvetica",int(24 * self.size_ratio)))
         lblTamilYearDetails.pack()
         
         self.lblTamilYearDetails = lblTamilYearDetails
@@ -262,7 +262,7 @@ class dayFrame(tk.Frame):
         frmDateDetails1 = tk.Frame(master=self)
         frmDateDetails1.grid(row=1,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
         lblDateDetails1 = tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=800 * self.size_ratio)
-        lblDateDetails1.config(font=("Helvetica",int(20 * self.size_ratio)))
+        lblDateDetails1.config(font=("Helvetica",int(24 * self.size_ratio)))
         lblDateDetails1.pack()
         
         self.lblDateDetails1 = lblDateDetails1
@@ -272,7 +272,7 @@ class dayFrame(tk.Frame):
         frmDateDetails2 = tk.Frame(master=self)
         frmDateDetails2.grid(row=2,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
         lblDateDetails2 = tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.CENTER, wraplength=800 * self.size_ratio)
-        lblDateDetails2.config(font=("Helvetica",int(20 * self.size_ratio)))
+        lblDateDetails2.config(font=("Helvetica",int(24 * self.size_ratio)))
         lblDateDetails2.pack()
         
         self.lblDateDetails2 = lblDateDetails2
@@ -282,10 +282,21 @@ class dayFrame(tk.Frame):
         frmDateDetails3 = tk.Frame(master=self)
         frmDateDetails3.grid(row=4,column=0, columnspan=2, rowspan=1, padx=10, pady=5)
         lblDateDetails3 = tk.Label(master=frmDateDetails3,text=textDateDetails3, justify=tk.CENTER, wraplength=800 * self.size_ratio)
-        lblDateDetails3.config(font=("Helvetica",int(14 * self.size_ratio)))
+        lblDateDetails3.config(font=("Helvetica",int(18 * self.size_ratio)))
         lblDateDetails3.pack()
         
         self.lblDateDetails3 = lblDateDetails3
+
+        textDateDetails4 = "Date Details 4"
+
+        frmDateDetails4 = tk.Frame(master=self)
+        frmDateDetails4.grid(row=5,column=0, columnspan=2, rowspan=1, padx=10, pady=5)
+        lblDateDetails4 = tk.Label(master=frmDateDetails4,text=textDateDetails4, justify=tk.CENTER, wraplength=800 * self.size_ratio)
+        lblDateDetails4.config(font=("Helvetica",int(18 * self.size_ratio)))
+        lblDateDetails4.pack()
+        
+        self.lblDateDetails4 = lblDateDetails4
+
 
         # Create a Tkinter variable
         location = StringVar(self)
@@ -367,10 +378,14 @@ class dayFrame(tk.Frame):
         guli = self.json_data["Gulikai Kalam"]
         yama = self.json_data["Yamaganda"]
 
-        textDateDetails3 = "Rahu: " + rahu + " " + "Gulikai: " + guli + \
-            " Yama: " + yama
+        textDateDetails3 = "Rahu: " + rahu + " " + "Gulikai: " + guli
         
         self.lblDateDetails3.configure(text=textDateDetails3)
+
+        textDateDetails4 = " Yama: " + yama
+
+        self.lblDateDetails4.configure(text=textDateDetails4)
+
 
         location_ids={}
         location_names={}
