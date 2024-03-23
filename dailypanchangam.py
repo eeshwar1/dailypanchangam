@@ -65,13 +65,13 @@ class PanchangamView(tk.Tk):
        self.resizable(False, False) # disable resizing
     
        frmBtnPrev = tk.Frame(master=self, borderwidth=1)
-       frmBtnPrev.grid(row=8,column=1,padx=5, pady=5, sticky=tk.W)
+       frmBtnPrev.grid(row=6,column=1,padx=5, pady=5, sticky=tk.W)
        btnPrev = tk.Button(master=frmBtnPrev, text="<", command=self.showPrevDate, height=1, width=3)
        btnPrev.config(font=("Helvetica Bold", int(12 * self.size_ratio)))
        btnPrev.pack()
        
        frmBtnToday = tk.Frame(master=self, borderwidth=1)
-       frmBtnToday.grid(row=8,column=2,padx=5, pady=5)
+       frmBtnToday.grid(row=6,column=2,padx=5, pady=5)
        btnToday = tk.Button(master=frmBtnToday, text="Today", command=self.showToday, height=1, width=10)
        btnToday.config(font=("Helvetica Bold", int(12 * self.size_ratio)))
        btnToday.pack()
@@ -79,8 +79,14 @@ class PanchangamView(tk.Tk):
        self.btnToday = btnToday
        self.originalButtonColor = self.btnToday.cget("background")  
 
+       frmBtnDate = tk.Frame(master=self, borderwidth=1)
+       frmBtnDate.grid(row=6,column=3,padx=5, pady=5)
+       btnDate = tk.Button(master=frmBtnDate, text="\u2317", command=self.showToday, height=1, width=4)
+       btnDate.config(font=("Helvetica Bold", int(10 * self.size_ratio)))
+       btnDate.pack()
+
        frmBtnNext = tk.Frame(master=self, borderwidth=1)
-       frmBtnNext.grid(row=8,column=3,padx=5, pady=5, sticky=tk.E)
+       frmBtnNext.grid(row=6,column=3,padx=5, pady=5, sticky=tk.E)
        btnNext = tk.Button(master=frmBtnNext, text=">", command=self.showNextDate, height=1, width=3)
        btnNext.config(font=("Helvetica Bold",int(12 * self.size_ratio)))
        btnNext.pack()
@@ -219,15 +225,15 @@ class dayFrame(tk.Frame):
         textTamilYearDetails = "Tamil Year Details"
         
         frmDate = tk.Frame(master=self)
-        frmDate.grid(row=0,column=0, columnspan=1, rowspan=2, padx=5, pady=20)
+        frmDate.grid(row=0,column=0, columnspan=1, rowspan=1, padx=5, pady=20)
         lblDate = tk.Label(master=frmDate,text=textCurrentDate, justify=tk.CENTER, wraplength=350 * self.size_ratio)
-        lblDate.config(font=("Helvetica",int(48 * self.size_ratio),"bold"))
+        lblDate.config(font=("Helvetica",int(30 * self.size_ratio),"bold"))
         lblDate.pack()
         
         self.lblDate = lblDate
 
         frmTamilDate = tk.Frame(master=self)
-        frmTamilDate.grid(row=0,column=1, columnspan=1, rowspan=2, padx=5, pady=5)
+        frmTamilDate.grid(row=0,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
         lblTamilDate = tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.CENTER, wraplength=420 * self.size_ratio)
         lblTamilDate.config(font=("Helvetica",int(48 * self.size_ratio),"bold"))
         lblTamilDate.pack()
@@ -235,17 +241,17 @@ class dayFrame(tk.Frame):
         self.lblTamilDate = lblTamilDate
 
         frmTamilDateDetails = tk.Frame(master=self)
-        frmTamilDateDetails.grid(row=2,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
+        frmTamilDateDetails.grid(row=1,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
         lblTamilDateDetails = tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblTamilDateDetails.config(font=("Helvetica",int(24 * self.size_ratio)))
+        lblTamilDateDetails.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblTamilDateDetails.pack()
         
         self.lblTamilDateDetails = lblTamilDateDetails
 
         frmTamilYearDetails = tk.Frame(master=self)
-        frmTamilYearDetails.grid(row=3,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
+        frmTamilYearDetails.grid(row=2,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
         lblTamilYearDetails = tk.Label(master=frmTamilYearDetails,text=textTamilYearDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblTamilYearDetails.config(font=("Helvetica",int(24 * self.size_ratio)))
+        lblTamilYearDetails.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblTamilYearDetails.pack()
         
         self.lblTamilYearDetails = lblTamilYearDetails
@@ -254,7 +260,7 @@ class dayFrame(tk.Frame):
         textDateDetails1 = "Date Details 1"
 
         frmDateDetails1 = tk.Frame(master=self)
-        frmDateDetails1.grid(row=2,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
+        frmDateDetails1.grid(row=1,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
         lblDateDetails1 = tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=800 * self.size_ratio)
         lblDateDetails1.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblDateDetails1.pack()
@@ -264,7 +270,7 @@ class dayFrame(tk.Frame):
         textDateDetails2 = "Date Details 2"
 
         frmDateDetails2 = tk.Frame(master=self)
-        frmDateDetails2.grid(row=3,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
+        frmDateDetails2.grid(row=2,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
         lblDateDetails2 = tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.CENTER, wraplength=800 * self.size_ratio)
         lblDateDetails2.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblDateDetails2.pack()
@@ -288,7 +294,7 @@ class dayFrame(tk.Frame):
         locationPopupStyle = ttk.Style()
         locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(11 * self.size_ratio)),width=min(30,int(22 * self.size_ratio)))
         frmLocationPopup = tk.Frame(master=self)
-        frmLocationPopup.grid(row=10, column=0, columnspan=2, padx=5, pady=5, sticky=tk.EW)
+        frmLocationPopup.grid(row=8, column=0, columnspan=2, padx=5, pady=5, sticky=tk.EW)
         locationPopup = ttk.OptionMenu(frmLocationPopup, location, *locations, style="my.TMenubutton", command=self.set_location)
         locationPopup.pack()
         
