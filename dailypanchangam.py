@@ -260,9 +260,9 @@ class dayFrame(tk.Frame):
         textDateDetails1 = "Date Details 1"
 
         frmDateDetails1 = tk.Frame(master=self)
-        frmDateDetails1.grid(row=1,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
-        lblDateDetails1 = tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=800 * self.size_ratio)
-        lblDateDetails1.config(font=("Helvetica",int(24 * self.size_ratio)))
+        frmDateDetails1.grid(row=0,column=0, columnspan=1, rowspan=2, padx=5, pady=10)
+        lblDateDetails1 = tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=400 * self.size_ratio)
+        lblDateDetails1.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblDateDetails1.pack()
         
         self.lblDateDetails1 = lblDateDetails1
@@ -270,32 +270,12 @@ class dayFrame(tk.Frame):
         textDateDetails2 = "Date Details 2"
 
         frmDateDetails2 = tk.Frame(master=self)
-        frmDateDetails2.grid(row=2,column=0, columnspan=1, rowspan=1, padx=5, pady=5)
-        lblDateDetails2 = tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.CENTER, wraplength=800 * self.size_ratio)
-        lblDateDetails2.config(font=("Helvetica",int(24 * self.size_ratio)))
+        frmDateDetails2.grid(row=1,column=0, columnspan=1, rowspan=3, padx=5, pady=10)
+        lblDateDetails2 = tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.CENTER, wraplength=400 * self.size_ratio)
+        lblDateDetails2.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblDateDetails2.pack()
         
         self.lblDateDetails2 = lblDateDetails2
-
-        textDateDetails3 = "Date Details 3"
-
-        frmDateDetails3 = tk.Frame(master=self)
-        frmDateDetails3.grid(row=4,column=0, columnspan=2, rowspan=1, padx=10, pady=5)
-        lblDateDetails3 = tk.Label(master=frmDateDetails3,text=textDateDetails3, justify=tk.CENTER, wraplength=800 * self.size_ratio)
-        lblDateDetails3.config(font=("Helvetica",int(18 * self.size_ratio)))
-        lblDateDetails3.pack()
-        
-        self.lblDateDetails3 = lblDateDetails3
-
-        textDateDetails4 = "Date Details 4"
-
-        frmDateDetails4 = tk.Frame(master=self)
-        frmDateDetails4.grid(row=5,column=0, columnspan=2, rowspan=1, padx=10, pady=5)
-        lblDateDetails4 = tk.Label(master=frmDateDetails4,text=textDateDetails4, justify=tk.CENTER, wraplength=800 * self.size_ratio)
-        lblDateDetails4.config(font=("Helvetica",int(18 * self.size_ratio)))
-        lblDateDetails4.pack()
-        
-        self.lblDateDetails4 = lblDateDetails4
 
 
         # Create a Tkinter variable
@@ -367,24 +347,26 @@ class dayFrame(tk.Frame):
         sunrise = self.json_data["Sunrise"]
         sunset = self.json_data["Sunset"]
         nakshathram = self.json_data["Nakshathram"]
-        textDateDetails1 = " \u263c\u2191 " + sunrise + " " + " \u263c\u2193 " + sunset
+        textDateDetails1 = " \u263c\u2191 " + sunrise + " " + " \u263c\u2193 " + sunset \
+            + "\n \u2605 " + nakshathram
         
         self.lblDateDetails1.configure(text=textDateDetails1)
         
-        textDateDetails2 = " \u2605 " + nakshathram
-        self.lblDateDetails2.configure(text=textDateDetails2)
+   #     textDateDetails2 = " \u2605 " + nakshathram
+   #     self.lblDateDetails2.configure(text=textDateDetails2)
 
         rahu = self.json_data["Rahu Kalam"]
         guli = self.json_data["Gulikai Kalam"]
         yama = self.json_data["Yamaganda"]
 
-        textDateDetails3 = "Rahu: " + rahu + " " + "Gulikai: " + guli
+        textDateDetails2 = "Rahu: " + rahu + " " + "Gulikai: " + guli + \
+           "\n Yama: " + yama
         
-        self.lblDateDetails3.configure(text=textDateDetails3)
+        self.lblDateDetails2.configure(text=textDateDetails2)
 
-        textDateDetails4 = " Yama: " + yama
+       # textDateDetails3 = " Yama: " + yama
 
-        self.lblDateDetails4.configure(text=textDateDetails4)
+       # self.lblDateDetails3.configure(text=textDateDetails3)
 
 
         location_ids={}
