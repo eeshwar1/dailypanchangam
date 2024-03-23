@@ -53,25 +53,25 @@ class PanchangamView(tk.Tk):
        
        self.date = date.today()
        
-       self.set_font_sizes()
+       self.set_window_size()
        
        self.showing_today = True
        
-       self.container = dayFrame(self, self.date, self.size_ratio)
+       self.container = dayFrame(self, self.date, self.win_width, self.win_height, self.size_ratio)
 
-       self.container.grid(row=1,column=1,columnspan=4)
-       
+       self.container.grid(row=0,column=0, columnspan=4)
+
        self.title("Daily Panchangam")
        self.resizable(False, False) # disable resizing
     
        frmBtnPrev = tk.Frame(master=self, borderwidth=1)
-       frmBtnPrev.grid(row=6,column=1,padx=5, pady=5, sticky=tk.W)
+       frmBtnPrev.grid(row=1,column=1,padx=5, pady=5, sticky=tk.W)
        btnPrev = tk.Button(master=frmBtnPrev, text="<", command=self.showPrevDate, height=1, width=3)
        btnPrev.config(font=("Helvetica Bold", int(12 * self.size_ratio)))
        btnPrev.pack()
        
        frmBtnToday = tk.Frame(master=self, borderwidth=1)
-       frmBtnToday.grid(row=6,column=2,padx=5, pady=5)
+       frmBtnToday.grid(row=1,column=2,padx=5, pady=5)
        btnToday = tk.Button(master=frmBtnToday, text="Today", command=self.showToday, height=1, width=10)
        btnToday.config(font=("Helvetica Bold", int(12 * self.size_ratio)))
        btnToday.pack()
@@ -80,13 +80,13 @@ class PanchangamView(tk.Tk):
        self.originalButtonColor = self.btnToday.cget("background")  
 
        frmBtnDate = tk.Frame(master=self, borderwidth=1)
-       frmBtnDate.grid(row=6,column=3,padx=5, pady=5)
+       frmBtnDate.grid(row=1,column=3,padx=5, pady=5)
        btnDate = tk.Button(master=frmBtnDate, text="\u2317", command=self.showToday, height=1, width=4)
        btnDate.config(font=("Helvetica Bold", int(10 * self.size_ratio)))
        btnDate.pack()
 
        frmBtnNext = tk.Frame(master=self, borderwidth=1)
-       frmBtnNext.grid(row=6,column=3,padx=5, pady=5, sticky=tk.E)
+       frmBtnNext.grid(row=1,column=3,padx=5, pady=5, sticky=tk.E)
        btnNext = tk.Button(master=frmBtnNext, text=">", command=self.showNextDate, height=1, width=3)
        btnNext.config(font=("Helvetica Bold",int(12 * self.size_ratio)))
        btnNext.pack()
@@ -96,7 +96,7 @@ class PanchangamView(tk.Tk):
        self.protocol("WM_DELETE_WINDOW",self.stop_refresh_timer)
    
        
-    def set_font_sizes(self):
+    def set_window_size(self):
         
         SCREEN_WIDTH, SCREEN_HEIGHT = self.winfo_screenwidth(), self.winfo_screenheight()
         
@@ -105,22 +105,22 @@ class PanchangamView(tk.Tk):
         
         if SCREEN_WIDTH == 800 and SCREEN_HEIGHT == 480: # screen size that we designed for
             
-            win_width = SCREEN_WIDTH
-            win_height = int(SCREEN_HEIGHT * 0.9)
+            self.win_width = SCREEN_WIDTH
+            self.win_height = int(SCREEN_HEIGHT * 0.9)
         else:
-            win_width = int(SCREEN_WIDTH)
-            win_height = int(SCREEN_WIDTH * 0.6)
+            self.win_width = int(SCREEN_WIDTH)
+            self.win_height = int(SCREEN_WIDTH * 0.6)
          
-            if win_height > SCREEN_HEIGHT:
-                win_height = int(SCREEN_HEIGHT * 0.8)
-                win_width = int(win_height * 2.2)
+            if self.win_height > SCREEN_HEIGHT:
+                self.win_height = int(SCREEN_HEIGHT * 0.8)
+                self.win_width = int(self.win_height * 2.2)
         
-        self.geometry("{}x{}".format(win_width,win_height))
+        self.geometry("{}x{}".format(self.win_width,self.win_height))
         
         if DEBUG == True:
-            print("Window Size: {}x{}".format(win_width, win_height))
+            print("Window Size: {}x{}".format(self.win_width, self.win_height))
         
-        self.size_ratio = win_width/800
+        self.size_ratio = self.win_width/800
         
         if DEBUG == True:
             print("size ratio: {}".format(self.size_ratio))
@@ -175,7 +175,7 @@ class PanchangamView(tk.Tk):
             self.showToday()
             
     
-class dayFrame(tk.Frame):
+class dayFrame(ttk.Frame):
 
     frmDate = None
     lblDate = None
@@ -197,9 +197,33 @@ class dayFrame(tk.Frame):
     location_ids = []
     location_id = "4684888"
     
-    def __init__(self, parent, day, size_ratio):
+    def __init__(self, parent, day, win_width, win_height, size_ratio):
         
-        tk.Frame.__init__(self, parent)
+        self.frame = ttk.Frame.__init__(self, parent)
+
+         # Create a canvas object and a vertical scrollbar for scrolling it.
+        vscrollbar = ttk.Scrollbar(self, orient=VERTICAL)
+        vscrollbar.pack(fill=Y, side=RIGHT, expand=TRUE)
+        
+        hscrollbar = ttk.Scrollbar(self, orient=HORIZONTAL)
+        hscrollbar.pack(fill=X, side=BOTTOM, expand=TRUE)
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=win_width * 0.99, height=win_height * 0.9,
+                           yscrollcommand=vscrollbar.set, xscrollcommand=hscrollbar.set)
+        self.canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
+        vscrollbar.config(command=self.canvas.yview)
+        hscrollbar.config(command=self.canvas.xview)
+
+        self.canvas.configure(scrollregion=(0, 0, win_width, win_height))
+
+        # Reset the view
+        self.canvas.xview_moveto(0)
+        self.canvas.yview_moveto(0)
+
+        self.canvas
+
+        self.interior = interior = ttk.Frame(master=self.canvas, width=win_width, height=win_height)
+        interior_id = self.canvas.create_window(0, 0, window=self.interior,
+                                           anchor=NW)
         
         self.date = day
         self.size_ratio = size_ratio
@@ -212,6 +236,23 @@ class dayFrame(tk.Frame):
         
         self.show_json_data()
         
+        # Track changes to the canvas and frame width and sync them,
+        # also updating the scrollbar.
+        def _configure_interior(event):
+            # Update the scrollbars to match the size of the inner frame.
+            size = (self.interior.winfo_reqwidth(), self.interior.winfo_reqheight())
+            self.canvas.config(scrollregion="0 0 %s %s" % size)
+            if self.interior.winfo_reqwidth() != self.canvas.winfo_width():
+                # Update the canvas's width to fit the inner frame.
+                self.canvas.config(width=interior.winfo_reqwidth())
+            self.interior.bind('<Configure>', _configure_interior)
+
+        def _configure_canvas(event):
+            if self.interior.winfo_reqwidth() != self.canvas.winfo_width():
+                # Update the inner frame's width to fill the canvas.
+                self.canvas.itemconfigure(interior_id, width=self.canvas.winfo_width())
+            self.canvas.bind('<Configure>', _configure_canvas)
+
     def show_fields(self):
         
         self.grid_columnconfigure(0, minsize=360 * self.size_ratio, weight=1)
@@ -224,7 +265,7 @@ class dayFrame(tk.Frame):
         textTamilDateDetails = "Tamil Date Details"
         textTamilYearDetails = "Tamil Year Details"
         
-        frmDate = tk.Frame(master=self)
+        frmDate = tk.Frame(master=self.interior)
         frmDate.grid(row=0,column=0, columnspan=1, rowspan=1, padx=5, pady=20)
         lblDate = tk.Label(master=frmDate,text=textCurrentDate, justify=tk.CENTER, wraplength=350 * self.size_ratio)
         lblDate.config(font=("Helvetica",int(32 * self.size_ratio),"bold"))
@@ -232,7 +273,7 @@ class dayFrame(tk.Frame):
         
         self.lblDate = lblDate
 
-        frmTamilDate = tk.Frame(master=self)
+        frmTamilDate = tk.Frame(master=self.interior)
         frmTamilDate.grid(row=0,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
         lblTamilDate = tk.Label(master=frmTamilDate,text=textTamilDate, justify=tk.CENTER, wraplength=420 * self.size_ratio)
         lblTamilDate.config(font=("Helvetica",int(48 * self.size_ratio),"bold"))
@@ -240,7 +281,7 @@ class dayFrame(tk.Frame):
         
         self.lblTamilDate = lblTamilDate
 
-        frmTamilDateDetails = tk.Frame(master=self)
+        frmTamilDateDetails = tk.Frame(master=self.interior)
         frmTamilDateDetails.grid(row=1,column=1, columnspan=1, rowspan=1, padx=5, pady=10)
         lblTamilDateDetails = tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
         lblTamilDateDetails.config(font=("Helvetica",int(30 * self.size_ratio)))
@@ -248,7 +289,7 @@ class dayFrame(tk.Frame):
         
         self.lblTamilDateDetails = lblTamilDateDetails
 
-        frmTamilYearDetails = tk.Frame(master=self)
+        frmTamilYearDetails = tk.Frame(master=self.interior)
         frmTamilYearDetails.grid(row=2,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
         lblTamilYearDetails = tk.Label(master=frmTamilYearDetails,text=textTamilYearDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
         lblTamilYearDetails.config(font=("Helvetica",int(24 * self.size_ratio)))
@@ -259,7 +300,7 @@ class dayFrame(tk.Frame):
         
         textDateDetails1 = "Date Details 1"
 
-        frmDateDetails1 = tk.Frame(master=self)
+        frmDateDetails1 = tk.Frame(master=self.interior)
         frmDateDetails1.grid(row=1,column=0, columnspan=1, rowspan=1, padx=5, pady=10)
         lblDateDetails1 = tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=400 * self.size_ratio)
         lblDateDetails1.config(font=("Helvetica",int(23 * self.size_ratio)))
@@ -269,9 +310,9 @@ class dayFrame(tk.Frame):
 
         textDateDetails2 = "Date Details 2"
 
-        frmDateDetails2 = tk.Frame(master=self)
+        frmDateDetails2 = tk.Frame(master=self.interior)
         frmDateDetails2.grid(row=2,column=0, columnspan=1, rowspan=3, padx=5, pady=10)
-        lblDateDetails2 = tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.CENTER, wraplength=400 * self.size_ratio)
+        lblDateDetails2 = tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.LEFT, wraplength=400 * self.size_ratio)
         lblDateDetails2.config(font=("Helvetica",int(22 * self.size_ratio)))
         lblDateDetails2.pack()
         
@@ -283,27 +324,18 @@ class dayFrame(tk.Frame):
         locations=[]
 
         locationPopupStyle = ttk.Style()
-        locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(11 * self.size_ratio)),width=min(30,int(22 * self.size_ratio)))
-        frmLocationPopup = tk.Frame(master=self)
-        frmLocationPopup.grid(row=8, column=0, columnspan=2, padx=5, pady=5, sticky=tk.EW)
+        locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(16 * self.size_ratio)),width=min(30,int(22 * self.size_ratio)))
+        frmLocationPopup = tk.Frame(master=self.interior)
+        frmLocationPopup.grid(row=8, column=0, columnspan=1, padx=5, pady=5, sticky=tk.EW)
         locationPopup = ttk.OptionMenu(frmLocationPopup, location, *locations, style="my.TMenubutton", command=self.set_location)
         locationPopup.pack()
         
         self.locationPopup = locationPopup
         
-        locationPopup["menu"].config(font=("Helvetica",int(11 * self.size_ratio)))
-        
-        # frmdatePicker = tk.Frame(master=self)
-        # frmdatePicker.grid(row=10, column=1, padx=5, pady=5)
-        # datePicker = DateEntry(master=frmdatePicker, width=8, background='darkblue', foreground='white', borderwidth=2)
-        # datePicker.config(font=("Helvetica Bold", int(10 * self.size_ratio)))
-        # datePicker.pack()
-        # datePicker.bind("<<DateEntrySelected>>", self.set_new_date)
-
-        # self.datePicker = datePicker 
+        locationPopup["menu"].config(font=("Helvetica",int(14 * self.size_ratio)))
     
-        frmRefreshTime = tk.Frame(master=self)
-        frmRefreshTime.grid(row=12,column=0, columnspan=2, padx=5, pady=5)
+        frmRefreshTime = tk.Frame(master=self.interior)
+        frmRefreshTime.grid(row=8,column=1, columnspan=1, padx=5, pady=5)
         lblRefreshTime = tk.Label(master=frmRefreshTime,text="", justify=tk.LEFT)
         lblRefreshTime.config(font=("Helvetica",int(10 * self.size_ratio)))
         lblRefreshTime.pack()
@@ -360,7 +392,7 @@ class dayFrame(tk.Frame):
         yama = self.json_data["Yamaganda"]
 
         textDateDetails2 = "Rahu: " + rahu + " " + "Guli: " + guli + \
-           "\n Yama: " + yama
+           "\nYama: " + yama
         
         self.lblDateDetails2.configure(text=textDateDetails2)
 
