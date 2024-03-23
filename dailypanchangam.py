@@ -241,7 +241,7 @@ class dayFrame(tk.Frame):
         self.lblTamilDate = lblTamilDate
 
         frmTamilDateDetails = tk.Frame(master=self)
-        frmTamilDateDetails.grid(row=1,column=1, columnspan=1, rowspan=1, padx=5, pady=5)
+        frmTamilDateDetails.grid(row=1,column=1, columnspan=1, rowspan=1, padx=5, pady=10)
         lblTamilDateDetails = tk.Label(master=frmTamilDateDetails,text=textTamilDateDetails, justify=tk.CENTER, wraplength=400 * self.size_ratio)
         lblTamilDateDetails.config(font=("Helvetica",int(30 * self.size_ratio)))
         lblTamilDateDetails.pack()
@@ -260,9 +260,9 @@ class dayFrame(tk.Frame):
         textDateDetails1 = "Date Details 1"
 
         frmDateDetails1 = tk.Frame(master=self)
-        frmDateDetails1.grid(row=0,column=0, columnspan=1, rowspan=2, padx=5, pady=10)
+        frmDateDetails1.grid(row=1,column=0, columnspan=1, rowspan=1, padx=5, pady=10)
         lblDateDetails1 = tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblDateDetails1.config(font=("Helvetica",int(20 * self.size_ratio)))
+        lblDateDetails1.config(font=("Helvetica",int(23 * self.size_ratio)))
         lblDateDetails1.pack()
         
         self.lblDateDetails1 = lblDateDetails1
@@ -270,9 +270,9 @@ class dayFrame(tk.Frame):
         textDateDetails2 = "Date Details 2"
 
         frmDateDetails2 = tk.Frame(master=self)
-        frmDateDetails2.grid(row=1,column=0, columnspan=1, rowspan=3, padx=5, pady=10)
+        frmDateDetails2.grid(row=2,column=0, columnspan=1, rowspan=3, padx=5, pady=10)
         lblDateDetails2 = tk.Label(master=frmDateDetails2,text=textDateDetails2, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblDateDetails2.config(font=("Helvetica",int(20 * self.size_ratio)))
+        lblDateDetails2.config(font=("Helvetica",int(22 * self.size_ratio)))
         lblDateDetails2.pack()
         
         self.lblDateDetails2 = lblDateDetails2
@@ -359,7 +359,7 @@ class dayFrame(tk.Frame):
         guli = self.json_data["Gulikai Kalam"]
         yama = self.json_data["Yamaganda"]
 
-        textDateDetails2 = "Rahu: " + rahu + " " + "Gulikai: " + guli + \
+        textDateDetails2 = "Rahu: " + rahu + " " + "Guli: " + guli + \
            "\n Yama: " + yama
         
         self.lblDateDetails2.configure(text=textDateDetails2)
