@@ -42,6 +42,10 @@ class RepeatedTimer(object):
         
 class PanchangamView(tk.Tk):
     
+    locations = []
+    location_ids = []
+    location_id = "4684888"
+
     def stop_refresh_timer(self):
         
         self.rt.stop()
@@ -59,17 +63,45 @@ class PanchangamView(tk.Tk):
        
        self.container = dayFrame(self, self.date, self.win_width, self.win_height, self.size_ratio)
 
-       self.container.grid(row=0,column=0, columnspan=4)
+       self.container.grid(row=0,column=0, columnspan=5)
 
        self.title("Daily Panchangam")
        self.resizable(False, False) # disable resizing
     
        frmBtnPrev = tk.Frame(master=self, borderwidth=1)
-       frmBtnPrev.grid(row=1,column=1,padx=5, pady=5, sticky=tk.W)
+       frmBtnPrev.grid(row=1,column=0,padx=5, pady=5, sticky=tk.W)
        btnPrev = tk.Button(master=frmBtnPrev, text="<", command=self.showPrevDate, height=1, width=3)
        btnPrev.config(font=("Helvetica Bold", int(12 * self.size_ratio)))
        btnPrev.pack()
+
+       # Create a Tkinter variable
+       location = StringVar(self)
+       locations=[]
+
+       locationPopupStyle = ttk.Style()
+       locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(16 * self.size_ratio)),width=min(30,int(22 * self.size_ratio)))
+       frmLocationPopup = tk.Frame(master=self)
+       frmLocationPopup.grid(row=1, column=1, columnspan=1, padx=5, pady=5, sticky=tk.EW)
+       locationPopup = ttk.OptionMenu(frmLocationPopup, location, *locations, style="my.TMenubutton", command=self.set_location)
+       locationPopup.pack()
+        
+       self.locationPopup = locationPopup
+        
+       locationPopup["menu"].config(font=("Helvetica",int(14 * self.size_ratio)))
        
+       location_ids={}
+       location_names={}
+       locations = []
+       for location in json.loads(panchangam.get_locations())["locations"]:
+           locations.append(location["name"])
+           location_ids[location["name"]] = location["id"]
+           location_names[location["id"]] = location["name"]
+        
+       self.locations = locations
+       self.location_ids = location_ids
+       
+       self.locationPopup.set_menu(location_names[self.location_id], *self.locations)
+
        frmBtnToday = tk.Frame(master=self, borderwidth=1)
        frmBtnToday.grid(row=1,column=2,padx=5, pady=5)
        btnToday = tk.Button(master=frmBtnToday, text="Today", command=self.showToday, height=1, width=10)
@@ -86,7 +118,7 @@ class PanchangamView(tk.Tk):
        btnDate.pack()
 
        frmBtnNext = tk.Frame(master=self, borderwidth=1)
-       frmBtnNext.grid(row=1,column=3,padx=5, pady=5, sticky=tk.E)
+       frmBtnNext.grid(row=1,column=4,padx=5, pady=5, sticky=tk.E)
        btnNext = tk.Button(master=frmBtnNext, text=">", command=self.showNextDate, height=1, width=3)
        btnNext.config(font=("Helvetica Bold",int(12 * self.size_ratio)))
        btnNext.pack()
@@ -167,7 +199,16 @@ class PanchangamView(tk.Tk):
             self.btnToday.configure(bg="blue", fg="white")
         else:
             self.btnToday.configure(bg=self.originalButtonColor, fg="black")
-            
+    
+    def set_location(self, location):
+        
+        self.location_id = self.location_ids[location]
+
+        self.container.set_location(self.location_id)
+        # print("Location changed to " + location + " location id set to " + self.location_id)
+     #   self.fetch_json_data_for_date(self.date)
+     #   self.show_json_data()
+
     def refresh(self):
         
         # print("date = {}, showing today = {}".format(self.date, self.showing_today))
@@ -223,8 +264,7 @@ class dayFrame(ttk.Frame):
 
         self.interior = interior = ttk.Frame(master=self.canvas, width=win_width, height=win_height)
         interior_id = self.canvas.create_window(0, 0, window=self.interior,
-                                           anchor=NW)
-        
+                                           anchor=NW)     
         self.date = day
         self.size_ratio = size_ratio
         
@@ -303,7 +343,7 @@ class dayFrame(ttk.Frame):
         frmDateDetails1 = tk.Frame(master=self.interior)
         frmDateDetails1.grid(row=1,column=0, columnspan=1, rowspan=1, padx=5, pady=10)
         lblDateDetails1 = tk.Label(master=frmDateDetails1,text=textDateDetails1, justify=tk.CENTER, wraplength=400 * self.size_ratio)
-        lblDateDetails1.config(font=("Helvetica",int(23 * self.size_ratio)))
+        lblDateDetails1.config(font=("Helvetica",int(20 * self.size_ratio)))
         lblDateDetails1.pack()
         
         self.lblDateDetails1 = lblDateDetails1
@@ -317,31 +357,23 @@ class dayFrame(ttk.Frame):
         lblDateDetails2.pack()
         
         self.lblDateDetails2 = lblDateDetails2
-
-
-        # Create a Tkinter variable
-        location = StringVar(self)
-        locations=[]
-
-        locationPopupStyle = ttk.Style()
-        locationPopupStyle.configure("my.TMenubutton",font=("Helvetica",int(16 * self.size_ratio)),width=min(30,int(22 * self.size_ratio)))
-        frmLocationPopup = tk.Frame(master=self.interior)
-        frmLocationPopup.grid(row=8, column=0, columnspan=1, padx=5, pady=5, sticky=tk.EW)
-        locationPopup = ttk.OptionMenu(frmLocationPopup, location, *locations, style="my.TMenubutton", command=self.set_location)
-        locationPopup.pack()
-        
-        self.locationPopup = locationPopup
-        
-        locationPopup["menu"].config(font=("Helvetica",int(14 * self.size_ratio)))
     
         frmRefreshTime = tk.Frame(master=self.interior)
-        frmRefreshTime.grid(row=8,column=1, columnspan=1, padx=5, pady=5)
+        frmRefreshTime.grid(row=3,column=1, columnspan=1, padx=5, pady=5)
         lblRefreshTime = tk.Label(master=frmRefreshTime,text="", justify=tk.LEFT)
         lblRefreshTime.config(font=("Helvetica",int(10 * self.size_ratio)))
         lblRefreshTime.pack()
         
         self.lblRefreshTime = lblRefreshTime
 
+    def set_location(self, location_id):
+        
+        self.location_id = location_id
+
+        # print("Location changed to " + location + " location id set to " + self.location_id)
+        self.fetch_json_data_for_date(self.date)
+        self.show_json_data()
+        
     def set_new_date(self, date):
 
         new_date = self.datePicker.get_date()
@@ -361,13 +393,6 @@ class dayFrame(ttk.Frame):
     def fetch_json_data_for_date(self, date):
         
         self.json_data = json.loads(panchangam.get_details_for_date(date, self.location_id))
-        
-    def set_location(self, location):
-        
-        self.location_id = self.location_ids[location]
-        # print("Location changed to " + location + " location id set to " + self.location_id)
-        self.fetch_json_data_for_date(self.date)
-        self.show_json_data()
             
     def show_json_data(self):
         
@@ -383,9 +408,6 @@ class dayFrame(ttk.Frame):
             + "\n \u2605 " + nakshathram
         
         self.lblDateDetails1.configure(text=textDateDetails1)
-        
-   #     textDateDetails2 = " \u2605 " + nakshathram
-   #     self.lblDateDetails2.configure(text=textDateDetails2)
 
         rahu = self.json_data["Rahu Kalam"]
         guli = self.json_data["Gulikai Kalam"]
@@ -396,26 +418,8 @@ class dayFrame(ttk.Frame):
         
         self.lblDateDetails2.configure(text=textDateDetails2)
 
-       # textDateDetails3 = " Yama: " + yama
-
-       # self.lblDateDetails3.configure(text=textDateDetails3)
-
-
-        location_ids={}
-        location_names={}
-        locations = []
-        for location in self.json_data["locations"]:
-            locations.append(location["name"])
-            location_ids[location["name"]] = location["id"]
-            location_names[location["id"]] = location["name"]
-        
-        self.locations = locations
-        self.location_ids = location_ids
         self.location_id = self.json_data["geo_location"]
-        
-        self.locationPopup.set_menu(location_names[self.location_id], *self.locations)
-                            
-        # datetime.now().strftime("%m/%d/%Y, %I:%M:%S %p")
+
         self.lblRefreshTime.configure(text="Last refreshed at {0}".format(self.json_data["last_refresh"]))
     
 app = PanchangamView()
