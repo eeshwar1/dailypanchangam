@@ -205,9 +205,6 @@ class PanchangamView(tk.Tk):
         self.location_id = self.location_ids[location]
 
         self.container.set_location(self.location_id)
-        # print("Location changed to " + location + " location id set to " + self.location_id)
-     #   self.fetch_json_data_for_date(self.date)
-     #   self.show_json_data()
 
     def refresh(self):
         
@@ -248,7 +245,7 @@ class dayFrame(ttk.Frame):
         
         hscrollbar = ttk.Scrollbar(self, orient=HORIZONTAL)
         hscrollbar.pack(fill=X, side=BOTTOM, expand=TRUE)
-        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=win_width * 0.95, height=win_height * 0.8,
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=win_width * 0.98, height=win_height * 0.8,
                            yscrollcommand=vscrollbar.set, xscrollcommand=hscrollbar.set)
         self.canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
         vscrollbar.config(command=self.canvas.yview)
