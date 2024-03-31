@@ -51,6 +51,11 @@ class PanchangamView(tk.Tk):
         self.rt.stop()
         self.destroy()
     
+    def date_selected(self, e):
+        new_date = e.widget.get_date()
+        print(f"Date selected: {new_date}")
+        self.show_date(new_date)
+
     def __init__(self, *args, **kwargs):
         
        tk.Tk.__init__(self, *args, **kwargs)
@@ -111,11 +116,14 @@ class PanchangamView(tk.Tk):
        self.btnToday = btnToday
        self.originalButtonColor = self.btnToday.cget("background")  
 
-       frmBtnDate = tk.Frame(master=self, borderwidth=1)
-       frmBtnDate.grid(row=1,column=3,padx=5, pady=5)
-       btnDate = tk.Button(master=frmBtnDate, text="\u2317", command=self.showToday, height=1, width=4)
-       btnDate.config(font=("Helvetica Bold", int(10 * self.size_ratio)))
-       btnDate.pack()
+       frmDateEntry = tk.Frame(master=self, borderwidth=1)
+       frmDateEntry.grid(row=1,column=3,padx=5,pady=5)
+       dateEntry = VUDateEntry(frmDateEntry, width=10, date_pattern='MM/dd/yyyy')
+       dateEntry.config(font=("Helvetica Bold", int(10 * self.size_ratio)))
+       dateEntry.bind("<<DateEntrySelected>>", self.date_selected)
+       dateEntry.pack()
+
+       self.dateEntry = dateEntry
 
        frmBtnNext = tk.Frame(master=self, borderwidth=1)
        frmBtnNext.grid(row=1,column=4,padx=5, pady=5, sticky=tk.E)
@@ -127,7 +135,8 @@ class PanchangamView(tk.Tk):
        
        self.protocol("WM_DELETE_WINDOW",self.stop_refresh_timer)
    
-       
+
+        
     def set_window_size(self):
         
         SCREEN_WIDTH, SCREEN_HEIGHT = self.winfo_screenwidth(), self.winfo_screenheight()
@@ -167,6 +176,8 @@ class PanchangamView(tk.Tk):
         
         self.container.set_date(self.date)
         
+        self.dateEntry.set_date(self.date)
+
         return
 
     def showNextDate(self):
@@ -179,6 +190,8 @@ class PanchangamView(tk.Tk):
         
         self.container.set_date(self.date)
         
+        self.dateEntry.set_date(self.date)
+
         return
     
     def showToday(self):
@@ -191,14 +204,29 @@ class PanchangamView(tk.Tk):
         
         self.container.set_date(self.date)
         
+        self.dateEntry.set_date(self.date)
+
         return
     
+    def show_date(self, date):
+
+        self.date = date
+
+        self.showing_today = False
+        self.check_today()
+        
+        self.container.set_date(self.date)
+
+        return
+
     def check_today(self):
         
         if self.showing_today == False:
             self.btnToday.configure(bg="blue", fg="white")
         else:
             self.btnToday.configure(bg=self.originalButtonColor, fg="black")
+    
+        return
     
     def set_location(self, location):
         
@@ -371,12 +399,6 @@ class dayFrame(ttk.Frame):
         self.fetch_json_data_for_date(self.date)
         self.show_json_data()
         
-    def set_new_date(self, date):
-
-        new_date = self.datePicker.get_date()
-        print(f"new date set: {self.datePicker.get_date()}")
-        self.set_date(new_date)
-        
     def set_date(self,date):
         
         self.date = date
@@ -418,8 +440,39 @@ class dayFrame(ttk.Frame):
         self.location_id = self.json_data["geo_location"]
 
         self.lblRefreshTime.configure(text="Last refreshed at {0}".format(self.json_data["last_refresh"]))
-    
-app = PanchangamView()
 
-app.mainloop()
+
+class VUDateEntry(DateEntry):
+
+    """Custom DateEntry to show calendar inside the screen. 
+        Based on https://stackoverflow.com/questions/64507155/behaviour-of-dateentry-in-tkinter-window
+    """
+    def drop_down(self):
+        """Display or withdraw the drop-down calendar depending on its current state."""
+        if self._calendar.winfo_ismapped():
+            self._top_cal.withdraw()
+        else:
+            self._validate_date()
+            date = self.parse_date(self.get())
+            x = self.winfo_rootx()
+            y = self.winfo_rooty() + self.winfo_height()
+            if self.winfo_toplevel().attributes('-topmost'):
+                self._top_cal.attributes('-topmost', True)
+            else:
+                self._top_cal.attributes('-topmost', False)
+            # - patch begin: make sure the drop-down calendar is visible
+            if x+self._top_cal.winfo_width() > self.winfo_screenwidth():
+                x = self.winfo_screenwidth() - self._top_cal.winfo_width()
+            if y+self._top_cal.winfo_height() > self.winfo_screenheight()-30:
+                y = self.winfo_rooty() - self._top_cal.winfo_height()
+            # - patch end
+            self._top_cal.geometry('+%i+%i' % (x, y))
+            self._top_cal.deiconify()
+            self._calendar.focus_set()
+            self._calendar.selection_set(date)  
+
+if __name__ == "__main__":          
+    app = PanchangamView()
+
+    app.mainloop()
 
