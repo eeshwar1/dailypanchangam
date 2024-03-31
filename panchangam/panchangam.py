@@ -82,9 +82,9 @@ def __fetch_data_from_web(date, location):
     response["last_refresh"] = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
 
     response["geo_location"] = location
-    response["locations"] = __locations
+    # response["locations"] = __locations
 
-    response["num_locations"] = len(__locations)
+    # response["num_locations"] = len(__locations)
 
     for item in dataItems:
         item_data = __find_data_web(soup, item)
@@ -123,8 +123,36 @@ def __edit_tamil_date_details(detail_text):
     else:
         edited_detail_text = detail_text
 
-    return (edited_detail_text.strip(), yugam)
+    return (__tamil_to_tamizh(edited_detail_text.strip()), yugam)
 
+
+def __tamil_to_tamizh(text):
+
+    output_text = text
+    __tithi_mapping = { 
+            "Pirathamai": "Prathamai",
+            "Thuthiyai": "Dwithiyai",
+            "Thiruthiyai": "Thrithiyai",
+            "Sathurthi": "Chathurthi",
+            "Panjami": "Panchami",
+            "Shasti": "Shashti",
+            "Sapthami": "Sapthami",
+            "Astami": "Ashtami",
+            "Navami": "Navami",
+            "Thasami": "Dashami",
+            "Egadashi": "Ekadashi",
+            "Duvadasi": "Dwadashi",
+            "Thirayodasi": "Thrayodashi",
+            "Sathuradasi": "Chathurdashi",
+            "Pournami": "Pournami",
+            "Amavasai": "Ammavasai"
+
+    }
+
+    for word, replacement in __tithi_mapping.items():
+        output_text = output_text.replace(word, replacement)
+
+    return output_text
 
 
 if __name__ == "__main__":
